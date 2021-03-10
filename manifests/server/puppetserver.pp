@@ -246,10 +246,16 @@ class puppet::server::puppetserver (
     content => template('puppet/server/puppetserver/conf.d/puppetserver.conf.erb'),
   }
 
-  $auth_template = pick($server_auth_template, 'puppet/server/puppetserver/conf.d/auth.conf.erb')
+  if versioncmp($server_puppetserver_version, '7.0.0') >= 0 {
+    $auth_ensure = 'absent'
+    $auth_content = undef
+  } else {
+    $auth_ensure = 'file'
+    $auth_content = template(pick($server_auth_template, 'puppet/server/puppetserver/conf.d/auth.conf.erb'))
+  }
   file { "${server_puppetserver_dir}/conf.d/auth.conf":
-    ensure  => file,
-    content => template($auth_template),
+    ensure  => $auth_ensure,
+    content => $auth_content,
   }
 
   file { "${server_puppetserver_dir}/conf.d/webserver.conf":

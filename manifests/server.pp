@@ -476,10 +476,18 @@ class puppet::server(
   # assume a particular version here.
   if $puppetserver_version {
     $real_puppetserver_version = $puppetserver_version
-  } elsif versioncmp($::puppetversion, '6.0.0') >= 0 {
+  } elsif versioncmp($facts['puppetversion'], '7.0.0') >= 0 {
+    $real_puppetserver_version = '7.0.0'
+  } elsif versioncmp($facts['puppetversion'], '6.0.0') >= 0 {
     $real_puppetserver_version = '6.0.0'
-  } else  {
+  } else {
     $real_puppetserver_version = '5.3.6'
+  }
+
+  if versioncmp($real_puppetserver_version, '7.0.0') >= 0 {
+    if $use_legacy_auth_conf {
+      fail('The jruby-puppet.use-legacy-auth-conf setting is removed in Puppetserver 7')
+    }
   }
 
   # Prefer the user setting,otherwise disable for Puppetserver 2.x, enabled for 5.x
